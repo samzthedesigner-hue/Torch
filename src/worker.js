@@ -1,6 +1,6 @@
-import { WorkerMLCEngine } from "@mlc-ai/web-llm";
+import { WebWorkerMLCEngine } from "@mlc-ai/web-llm/lib/worker";
 
-const engine = new WorkerMLCEngine();
+const engine = new WebWorkerMLCEngine();
 
 self.onmessage = (event) => {
   engine.onmessage(event);
