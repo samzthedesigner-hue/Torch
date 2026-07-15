@@ -35,7 +35,10 @@ Tap "Install to Android" on Chrome to install as a PWA
 3.  Or tap the "Install to Android" button inside Torch
 
 ## 📄 License
-MIT License - feel free to use and modify
+Copyright © 2026 samzthedesigner.hue. All Rights Reserved.
+
+This software and its associated documentation files are proprietary. 
+No part of this software may be copied, modified, or distributed without explicit permission from the author.
 
 ---
 Made with 🔥 by samzthedesigner.hue
