@@ -1,4 +1,4 @@
-name: Deploy Torch Application to GitHub Pages
+name: Deploy to GitHub Pages
 on:
   push:
     branches: ["main"]
@@ -6,33 +6,19 @@ permissions:
   contents: read
   pages: write
   id-token: write
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository Blueprint Source
-        uses: actions/checkout@v4
-      - name: Setup Node Platform Runtime
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
-      - name: Install System Dependencies
-        run: npm ci
-      - name: Build Minified Distribution Target Bundle
-        run: npm run build
-      - name: Configure Cloud Pages Deployment Interface
-        uses: actions/configure-pages@v5
-      - name: Upload Static Assembly Artifacts
-        uses: actions/upload-pages-artifact@v3
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: './dist'
-      - name: Execute Live Edge Infrastructure Deployment
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - uses: actions/deploy-pages@v4
