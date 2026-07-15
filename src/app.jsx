@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CreateWebWorkerEngine } from '@mlc-ai/web-llm';
 import JSZip from 'jszip';
 import { Flame, Download, Sparkles, Terminal, Layers, Smartphone } from 'lucide-react';
+
 export default function App() {
   const [engine, setEngine] = useState(null);
   const [prompt, setPrompt] = useState('');
@@ -12,6 +13,7 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [logs, setLogs] = useState([]);
   const logEndRef = useRef(null);
+
   useEffect(() => {
     const handler = (e) => {
       e.preventDefault();
@@ -19,6 +21,7 @@ export default function App() {
       addLog('🚀 Torch PWA is ready for local Android device installation!');
     };
     window.addEventListener('beforeinstallprompt', handler);
+
     async function initWebLLM() {
       try {
         addLog('⚡ Attaching WebGPU computing layers...');
@@ -42,11 +45,14 @@ export default function App() {
     }
     initWebLLM();
     return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, );
+  }, []); // FIXED: added []
+
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, );
+  }, [logs]); // FIXED: added [logs]
+
   const addLog = (msg) => setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
+
   const triggerAndroidInstall = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt();
@@ -54,8 +60,10 @@ export default function App() {
       if (outcome === 'accepted') setDeferredPrompt(null);
     }
   };
+
   const executeCompilation = async () => {
     if (!prompt.trim()) return addLog('⚠️ App requirements input canvas is empty.');
+    if (!engine) return addLog('⚠️ AI Engine not loaded yet. Wait for 100%');
     setStatus('Torch Compilation Agent Running...');
     addLog(`🏗️ Spawning environment framework for project: [${projectName}]`);
     addLog(`🛠️ Target technology matrix configured to: [${targetTech}]`);
@@ -104,8 +112,9 @@ export default function App() {
       addLog(`❌ Fatal parsing structure error: ${err.message}`);
     }
   };
+
   return (
-    <div className="min-h-screen bg-[#0b0c10] text-slate-100 flex-col font-mono text-sm max-w-5xl mx-auto p-4 md:p-6 selection:bg-orange-500 selection:text-black">
+    <div className="min-h-screen bg-[#0b0c10] text-slate-100 flex flex-col font-mono text-sm max-w-5xl mx-auto p-4 md:p-6 selection:bg-orange-500 selection:text-black">
       <header className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-6">
         <div className="flex items-center gap-2">
           <Flame className="w-6 h-6 text-orange-500 animate-pulse" />
@@ -119,7 +128,7 @@ export default function App() {
       </header>
       <main className="grid grid-cols-1 md:grid-cols-3 gap-6 flex-grow">
         <div className="md:col-span-1 space-y-4">
-          <div className="bg-[#111217] border-zinc-800 p-4 rounded-lg space-y-4">
+          <div className="bg-[#111217] border border-zinc-800 p-4 rounded-lg space-y-4">
             <h2 className="font-bold text-orange-500 flex items-center gap-2 border-b border-zinc-800 pb-2"><Layers className="w-4 h-4" /> Config</h2>
             <div>
               <label className="block text-xs text-zinc-500 mb-1 uppercase">Output Project Identifier</label>
@@ -127,7 +136,7 @@ export default function App() {
             </div>
             <div>
               <label className="block text-xs text-zinc-500 mb-1 uppercase">Technology Stack Ecosystem</label>
-              <select value={targetTech} onChange={(e) => setTargetTech(e.target.value)} className="w-full bg-[#1c1d24] border-zinc-700 px-3 py-2 rounded focus:outline-none focus:border-orange-500">
+              <select value={targetTech} onChange={(e) => setTargetTech(e.target.value)} className="w-full bg-[#1c1d24] border border-zinc-700 px-3 py-2 rounded focus:outline-none focus:border-orange-500">
                 <option>React + Node.js (Fullstack PWA)</option>
                 <option>Python + Flask Server</option>
                 <option>Java Spring Boot Enterprise</option>
@@ -145,12 +154,12 @@ export default function App() {
           </div>
         </div>
         <div className="md:col-span-2 flex-col space-y-4">
-          <div className="bg-[#111217] border border-zinc-800 p-4 rounded-lg flex-col flex-grow min-h-[400px]">
-            <label className="text-xs text-zinc-500 mb-2 uppercase tracking-widest font-bold">Comprehensive Multi-File Functional Requirements Specification Canvas (&gt;5000 Words Supported)</label>
+          <div className="bg-[#111217] border border-zinc-800 p-4 rounded-lg flex flex-col flex-grow min-h-[400px]">
+            <label className="text-xs text-zinc-500 mb-2 uppercase tracking-widest font-bold">Comprehensive Multi-File Functional Requirements Specification Canvas</label>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe systemic multi-tier folder applications in explicit runtime detail... E.g., 'Build an offline personal management platform using React for client dashboard UI alongside an autonomous Python engine storing analytical data tables...'"
+              placeholder="Describe systemic multi-tier folder applications in explicit runtime detail... E.g., 'Build an offline personal management platform using React for client dashboard UI...'"
               className="w-full flex-grow bg-[#1c1d24] p-4 rounded font-mono text-zinc-300 border-zinc-700 focus:outline-none focus:border-orange-500 resize-none min-h-[350px]"
             />
             <button onClick={executeCompilation} className="w-full mt-4 bg-orange-500 hover:bg-orange-400 text-black font-bold p-3 rounded flex items-center justify-center gap-2 transition tracking-wider uppercase text-base">
@@ -159,7 +168,7 @@ export default function App() {
           </div>
         </div>
       </main>
-      <footer className="mt-6 bg-[#090a0d] border-zinc-800 rounded-lg p-4">
+      <footer className="mt-6 bg-[#090a0d] border border-zinc-800 rounded-lg p-4">
         <h3 className="text-xs font-bold text-zinc-500 uppercase mb-2 flex items-center gap-1.5"><Terminal className="w-3.5 h-3.5" /> Compiler Telemetry Monitor Logs</h3>
         <div className="space-y-1 text-xs text-zinc-400 font-mono max-h-40 overflow-y-auto">
           {logs.map((log, index) => <div key={index}>{log}</div>)}
