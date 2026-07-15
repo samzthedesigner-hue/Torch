@@ -45,11 +45,11 @@ export default function App() {
     }
     initWebLLM();
     return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []); // FIXED: added []
+  }, []); // FIXED
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logs]); // FIXED: added [logs]
+  }, [logs]); // FIXED
 
   const addLog = (msg) => setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
 
@@ -70,13 +70,7 @@ export default function App() {
     try {
       const systemDirective = `You are Torch, an offline full-stack engineering agent.
       Analyze the prompt and generate multiple files covering both the frontend and backend architectures requested.
-      You must respond strictly with a valid JSON array of file objects, containing no markdown formatting outside of the JSON structure itself.
-      Output structure example:
-      [
-        {"path": "package.json", "content": "..."},
-        {"path": "src/App.js", "content": "..."},
-        {"path": "server.js", "content": "..."}
-      ]`;
+      You must respond strictly with a valid JSON array of file objects, containing no markdown formatting outside of the JSON structure itself.`;
       addLog('🤖 Sending blueprints into offline WebGPU transformer pipeline...');
       const completion = await engine.chat.completions.create({
         messages: [
@@ -93,13 +87,6 @@ export default function App() {
         zip.file(file.path, file.content);
         addLog(` -> Generated File: ${file.path}`);
       });
-      zip.file("manifest.json", JSON.stringify({
-        short_name: projectName,
-        name: `${projectName} (Built by Torch)`,
-        start_url: "./index.html",
-        display: "standalone"
-      }, null, 2));
-      zip.file("index.html", `<!DOCTYPE html><html><head><link rel="manifest" href="manifest.json"></head><body><script>navigator.serviceWorker.register('sw.js');</script></body></html>`);
       const contentBlob = await zip.generateAsync({ type: 'blob' });
       const downloadAnchor = document.createElement('a');
       downloadAnchor.href = URL.createObjectURL(contentBlob);
@@ -130,51 +117,29 @@ export default function App() {
         <div className="md:col-span-1 space-y-4">
           <div className="bg-[#111217] border border-zinc-800 p-4 rounded-lg space-y-4">
             <h2 className="font-bold text-orange-500 flex items-center gap-2 border-b border-zinc-800 pb-2"><Layers className="w-4 h-4" /> Config</h2>
-            <div>
-              <label className="block text-xs text-zinc-500 mb-1 uppercase">Output Project Identifier</label>
-              <input type="text" value={projectName} onChange={(e) => setProjectName(e.target.value)} className="w-full bg-[#1c1d24] border-zinc-700 px-3 py-2 rounded focus:outline-none focus:border-orange-500" />
-            </div>
-            <div>
-              <label className="block text-xs text-zinc-500 mb-1 uppercase">Technology Stack Ecosystem</label>
-              <select value={targetTech} onChange={(e) => setTargetTech(e.target.value)} className="w-full bg-[#1c1d24] border border-zinc-700 px-3 py-2 rounded focus:outline-none focus:border-orange-500">
-                <option>React + Node.js (Fullstack PWA)</option>
-                <option>Python + Flask Server</option>
-                <option>Java Spring Boot Enterprise</option>
-                <option>Next.js + Tailwind App Router</option>
-                <option>Flutter Mobile Architecture</option>
-              </select>
-            </div>
+            <input type="text" value={projectName} onChange={(e) => setProjectName(e.target.value)} className="w-full bg-[#1c1d24] border-zinc-700 px-3 py-2 rounded" />
+            <select value={targetTech} onChange={(e) => setTargetTech(e.target.value)} className="w-full bg-[#1c1d24] border border-zinc-700 px-3 py-2 rounded">
+              <option>React + Node.js (Fullstack PWA)</option>
+              <option>Python + Flask Server</option>
+            </select>
           </div>
           <div className="bg-[#111217] border-zinc-800 p-4 rounded-lg">
             <div className="text-xs text-zinc-500 uppercase mb-1">System State</div>
-            <div className="font-bold text-emerald-400 break-words flex items-center gap-1.5"><Sparkles className="w-4 h-4 animate-spin text-orange-400" /> {status}</div>
-            <div className="w-full bg-zinc-800 h-1.5 mt-3 rounded-full overflow-hidden">
-              <div className="bg-orange-500 h-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
-            </div>
+            <div className="font-bold text-emerald-400">{status}</div>
+            <div className="w-full bg-zinc-800 h-1.5 mt-3 rounded-full"><div className="bg-orange-500 h-full" style={{ width: `${progress}%` }}></div></div>
           </div>
         </div>
-        <div className="md:col-span-2 flex-col space-y-4">
-          <div className="bg-[#111217] border border-zinc-800 p-4 rounded-lg flex flex-col flex-grow min-h-[400px]">
-            <label className="text-xs text-zinc-500 mb-2 uppercase tracking-widest font-bold">Comprehensive Multi-File Functional Requirements Specification Canvas</label>
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe systemic multi-tier folder applications in explicit runtime detail... E.g., 'Build an offline personal management platform using React for client dashboard UI...'"
-              className="w-full flex-grow bg-[#1c1d24] p-4 rounded font-mono text-zinc-300 border-zinc-700 focus:outline-none focus:border-orange-500 resize-none min-h-[350px]"
-            />
-            <button onClick={executeCompilation} className="w-full mt-4 bg-orange-500 hover:bg-orange-400 text-black font-bold p-3 rounded flex items-center justify-center gap-2 transition tracking-wider uppercase text-base">
-              <Download className="w-5 h-5" /> Compile & Package Distribution Archive
-            </button>
-          </div>
+        <div className="md:col-span-2">
+          <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} className="w-full bg-[#1c1d24] p-4 rounded min-h-[350px]" />
+          <button onClick={executeCompilation} className="w-full mt-4 bg-orange-500 text-black font-bold p-3 rounded">Compile & Package</button>
         </div>
       </main>
       <footer className="mt-6 bg-[#090a0d] border border-zinc-800 rounded-lg p-4">
-        <h3 className="text-xs font-bold text-zinc-500 uppercase mb-2 flex items-center gap-1.5"><Terminal className="w-3.5 h-3.5" /> Compiler Telemetry Monitor Logs</h3>
-        <div className="space-y-1 text-xs text-zinc-400 font-mono max-h-40 overflow-y-auto">
+        <div className="space-y-1 text-xs text-zinc-400 max-h-40 overflow-y-auto">
           {logs.map((log, index) => <div key={index}>{log}</div>)}
           <div ref={logEndRef} />
         </div>
       </footer>
     </div>
   );
-        }
+      }
